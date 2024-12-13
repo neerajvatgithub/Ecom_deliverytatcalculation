@@ -5,6 +5,31 @@ from datetime import datetime
 st.title("Delivery TAT Calculator")
 st.write("Debug: Application Started")
 
+def parse_date(date_str):
+    """Try different date formats and return parsed datetime"""
+    if pd.isna(date_str):
+        return None
+        
+    # List of possible date formats
+    formats = [
+        '%A, %B %d, %Y, %I:%M:%S %p',  # Friday, November 15, 2024, 9:21:12 PM
+        '%m/%d/%y %H:%M',              # 12/12/24 23:33
+        '%m/%d/%Y %H:%M',              # 12/13/2024 10:25
+        '%m/%d/%Y %H:%M:%S'            # 12/13/2024 10:25:00
+    ]
+    
+    for fmt in formats:
+        try:
+            return pd.to_datetime(date_str, format=fmt)
+        except:
+            continue
+    
+    # If none of the specific formats work, try pandas' general parser
+    try:
+        return pd.to_datetime(date_str)
+    except:
+        return None
+
 def calculate_tat(df):
     st.write("Debug: Calculating TAT")
     # Create a copy of the dataframe
@@ -17,10 +42,10 @@ def calculate_tat(df):
     st.write("Delivery date and time:", df_processed['Delivery date and time'].iloc[0] if not df_processed.empty else "No data")
     
     try:
-        # Convert string timestamps to datetime objects with the new format
-        df_processed['created_datetime'] = pd.to_datetime(df_processed['created_on'], errors='coerce')
-        df_processed['approval_datetime'] = pd.to_datetime(df_processed['approval date and time'], errors='coerce')
-        df_processed['delivery_datetime'] = pd.to_datetime(df_processed['Delivery date and time'], errors='coerce')
+        # Convert string timestamps to datetime objects using the flexible parser
+        df_processed['created_datetime'] = df_processed['created_on'].apply(parse_date)
+        df_processed['approval_datetime'] = df_processed['approval date and time'].apply(parse_date)
+        df_processed['delivery_datetime'] = df_processed['Delivery date and time'].apply(parse_date)
         
         # Debug: Show sample of parsed dates
         st.write("Debug: Sample parsed dates:")
@@ -137,6 +162,9 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"An error occurred while processing the file: {str(e)}")
         st.write("Please ensure your CSV file has the correct format with 'created_on', 'approval date and time', and 'Delivery date and time' columns.")
-        st.write("Date format should be like: 'Friday, November 15, 2024, 9:21:12 PM'")
+        st.write("Supported date formats:")
+        st.write("1. 'Friday, November 15, 2024, 9:21:12 PM'")
+        st.write("2. '12/12/24 23:33'")
+        st.write("3. '12/13/2024 10:25'")
 else:
     st.write("Debug: No file uploaded yet")
