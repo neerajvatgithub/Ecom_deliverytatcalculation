@@ -10,12 +10,15 @@ def parse_date(date_str):
     if pd.isna(date_str):
         return None
         
-    # List of possible date formats
+    # List of possible date formats (with and without 'at')
     formats = [
-        '%A, %B %d, %Y, %I:%M:%S %p',  # Friday, November 15, 2024, 9:21:12 PM
-        '%m/%d/%y %H:%M',              # 12/12/24 23:33
-        '%m/%d/%Y %H:%M',              # 12/13/2024 10:25
-        '%m/%d/%Y %H:%M:%S'            # 12/13/2024 10:25:00
+        '%A, %B %d, %Y, %I:%M:%S %p',      # Monday, April 21, 2025, 11:45:14 PM
+        '%A, %B %d, %Y at %I:%M:%S %p',    # Monday, April 21, 2025 at 11:45:14 PM
+        '%A, %B %d, %Y, %I:%M %p',         # Monday, April 21, 2025, 11:45 PM
+        '%A, %B %d, %Y at %I:%M %p',       # Monday, April 21, 2025 at 11:45 PM
+        '%m/%d/%y %H:%M',                  # 12/12/24 23:33
+        '%m/%d/%Y %H:%M',                  # 12/13/2024 10:25
+        '%m/%d/%Y %H:%M:%S'                # 12/13/2024 10:25:00
     ]
     
     for fmt in formats:
@@ -37,15 +40,15 @@ def calculate_tat(df):
     
     # Debug: Show sample of input dates
     st.write("Debug: Sample dates from input:")
-    st.write("created_on:", df_processed['created_on'].iloc[0] if not df_processed.empty else "No data")
-    st.write("approval date and time:", df_processed['approval date and time'].iloc[0] if not df_processed.empty else "No data")
-    st.write("Delivery date and time:", df_processed['Delivery date and time'].iloc[0] if not df_processed.empty else "No data")
+    st.write("Created time:", df_processed['Created time'].iloc[0] if not df_processed.empty else "No data")
+    st.write("Approval time:", df_processed['Approval time'].iloc[0] if not df_processed.empty else "No data")
+    st.write("Delivered time:", df_processed['Delivered time'].iloc[0] if not df_processed.empty else "No data")
     
     try:
         # Convert string timestamps to datetime objects using the flexible parser
-        df_processed['created_datetime'] = df_processed['created_on'].apply(parse_date)
-        df_processed['approval_datetime'] = df_processed['approval date and time'].apply(parse_date)
-        df_processed['delivery_datetime'] = df_processed['Delivery date and time'].apply(parse_date)
+        df_processed['created_datetime'] = df_processed['Created time'].apply(parse_date)
+        df_processed['approval_datetime'] = df_processed['Approval time'].apply(parse_date)
+        df_processed['delivery_datetime'] = df_processed['Delivered time'].apply(parse_date)
         
         # Debug: Show sample of parsed dates
         st.write("Debug: Sample parsed dates:")
@@ -139,15 +142,16 @@ if uploaded_file is not None:
         # Display the processed dataframe
         st.subheader("Processed Data")
         display_columns = [
-            'created_on', 
-            'approval date and time',
-            'Delivery date and time',
+            'Created time', 
+            'Approval time',
+            'Delivered time',
             'Created to Approval TAT',
             'Created to Delivery TAT', 
             'Approval to Delivery TAT',
-            'order_id',
-            'shipping_address_city'
+            'order_id'
         ]
+        # Only show columns that exist
+        display_columns = [col for col in display_columns if col in df_with_tat.columns]
         st.dataframe(df_with_tat[display_columns])
         
         # Download button for processed data
@@ -161,10 +165,11 @@ if uploaded_file is not None:
         
     except Exception as e:
         st.error(f"An error occurred while processing the file: {str(e)}")
-        st.write("Please ensure your CSV file has the correct format with 'created_on', 'approval date and time', and 'Delivery date and time' columns.")
+        st.write("Please ensure your CSV file has the correct format with 'Created time', 'Approval time', and 'Delivered time' columns.")
         st.write("Supported date formats:")
-        st.write("1. 'Friday, November 15, 2024, 9:21:12 PM'")
-        st.write("2. '12/12/24 23:33'")
-        st.write("3. '12/13/2024 10:25'")
+        st.write("1. 'Monday, April 21, 2025, 11:45:14 PM'")
+        st.write("2. 'Monday, April 21, 2025 at 11:45:14 PM'")
+        st.write("3. '12/12/24 23:33'")
+        st.write("4. '12/13/2024 10:25'")
 else:
     st.write("Debug: No file uploaded yet")

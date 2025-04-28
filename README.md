@@ -22,8 +22,8 @@ A Streamlit application to calculate and analyze delivery Turn Around Time (TAT)
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/ecom_deliveryTAT.git
-cd ecom_deliveryTAT
+git clone https://github.com/neerajvatgithub/Ecom_deliverytatcalculation.git
+cd Ecom_deliverytatcalculation
 ```
 
 2. Create a virtual environment and activate it:
@@ -45,18 +45,28 @@ streamlit run main.py
 ```
 
 2. Upload your CSV file with the following columns:
-   - created_on
-   - approval date and time
-   - Delivery date and time
+   - Created time
+   - Approval time
+   - Delivered time
    - order_id
-   - shipping_address_city
 
 3. View the calculated TAT metrics and download processed data
 
 ## Input Data Format
 
-The CSV file should contain dates in the format:
-- Example: "Friday, November 15, 2024, 9:21:12 PM"
+The CSV file should contain dates in any of the following formats:
+- `Monday, April 21, 2025, 11:45:14 PM`
+- `Monday, April 21, 2025 at 11:45:14 PM`
+- `Monday, April 21, 2025, 11:45 PM`
+- `Monday, April 21, 2025 at 11:45 PM`
+- `12/12/24 23:33`
+- `12/13/2024 10:25`
+- `12/13/2024 10:25:00`
+
+**Example CSV:**
+| order_id | Created time                        | Approval time                        | Delivered time                       |
+|----------|-------------------------------------|--------------------------------------|--------------------------------------|
+| OID41591 | Monday, April 21, 2025 at 11:45:14 PM | Tuesday, April 22, 2025 at 8:36:52 AM | Tuesday, April 22, 2025 at 10:09:55 AM |
 
 ## License
 
